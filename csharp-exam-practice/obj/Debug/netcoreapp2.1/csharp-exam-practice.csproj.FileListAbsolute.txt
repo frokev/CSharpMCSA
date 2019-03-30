@@ -1,0 +1,11 @@
+C:\Users\Tor\source\repos\csharp-exam-practice\csharp-exam-practice\bin\Debug\netcoreapp2.1\csharp-exam-practice.deps.json
+C:\Users\Tor\source\repos\csharp-exam-practice\csharp-exam-practice\bin\Debug\netcoreapp2.1\csharp-exam-practice.runtimeconfig.json
+C:\Users\Tor\source\repos\csharp-exam-practice\csharp-exam-practice\bin\Debug\netcoreapp2.1\csharp-exam-practice.runtimeconfig.dev.json
+C:\Users\Tor\source\repos\csharp-exam-practice\csharp-exam-practice\bin\Debug\netcoreapp2.1\csharp-exam-practice.dll
+C:\Users\Tor\source\repos\csharp-exam-practice\csharp-exam-practice\bin\Debug\netcoreapp2.1\csharp-exam-practice.pdb
+C:\Users\Tor\source\repos\csharp-exam-practice\csharp-exam-practice\obj\Debug\netcoreapp2.1\csharp-exam-practice.csprojAssemblyReference.cache
+C:\Users\Tor\source\repos\csharp-exam-practice\csharp-exam-practice\obj\Debug\netcoreapp2.1\csharp-exam-practice.csproj.CoreCompileInputs.cache
+C:\Users\Tor\source\repos\csharp-exam-practice\csharp-exam-practice\obj\Debug\netcoreapp2.1\csharp-exam-practice.AssemblyInfoInputs.cache
+C:\Users\Tor\source\repos\csharp-exam-practice\csharp-exam-practice\obj\Debug\netcoreapp2.1\csharp-exam-practice.AssemblyInfo.cs
+C:\Users\Tor\source\repos\csharp-exam-practice\csharp-exam-practice\obj\Debug\netcoreapp2.1\csharp-exam-practice.dll
+C:\Users\Tor\source\repos\csharp-exam-practice\csharp-exam-practice\obj\Debug\netcoreapp2.1\csharp-exam-practice.pdb
