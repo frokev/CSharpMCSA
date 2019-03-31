@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using System.Xml.Serialization;
 
 namespace csharp_exam_practice
 {   
@@ -407,6 +408,87 @@ namespace csharp_exam_practice
             }
         }
 
-        // IUnknown
+        // IUnknown? (very little documentation)
+    }
+
+    // Find, execute, and create types at runtime by using reflection
+
+    // [assembly: CLSCompliant(true)]    Specify CLS compliance for entire assembly
+
+    class FiExCrTyRuRe
+    {
+        // Create and apply attributes
+        // Attributes - Extensible mechanism for adding custom information to code elements. C# and .NET includes predefined attributes
+        [Obsolete]
+        public class ObsoleteClass { }
+
+        // The attribute maps to XML element named Customer
+        // attribute tells XML serializer (in System.Xml.Serialization) how an object is represented in XML
+        // [XmlElement("Customer", Namespace = "csharp_exam_practice")]
+        public class CustomerEntity { }
+
+        // Multiple attributes can be specified for a single code element
+        // [Serializable, Obsolete, CLSCompliant(false)]
+
+        // Caller info attributes
+        // [CallerMemberName] applies the caller’s member name
+        // [CallerFilePath] applies the path to caller’s source code file
+        // [CallerLineNumber] applies the line number in caller’s source code file        // Create attributes - by deriving from Attribute        class Author : Attribute
+        {
+            private string name;
+            public double version;
+
+            public Author(string name)
+            {
+                this.name = name;
+                version = 1.0;
+            }
+        }
+
+        // Read attributes
+        [Author("kevin", version = 2)]
+        public void Method()
+        {
+            System.Reflection.MethodInfo attr = typeof(FiExCrTyRuRe).GetMethod("Author");
+        }
+
+        // Generate code
+        class GenerateCode
+        {
+            //public static string GenerateCSharpCode(CodeCompileUnit compileunit)
+            //{
+            //    // Generate the code with the C# code provider.
+            //    CSharpCodeProvider provider = new CSharpCodeProvider();
+
+            //    // Build the output file name.
+            //    string sourceFile;
+            //    if (provider.FileExtension[0] == '.')
+            //    {
+            //        sourceFile = "HelloWorld" + provider.FileExtension;
+            //    }
+            //    else
+            //    {
+            //        sourceFile = "HelloWorld." + provider.FileExtension;
+            //    }
+
+            //    // Create a TextWriter to a StreamWriter to the output file.
+            //    using (StreamWriter sw = new StreamWriter(sourceFile, false))
+            //    {
+            //        IndentedTextWriter tw = new IndentedTextWriter(sw, "    ");
+
+            //        // Generate source code using the code provider.
+            //        provider.GenerateCodeFromCompileUnit(compileunit, tw,
+            //            new CodeGeneratorOptions());
+
+            //        // Close the output file.
+            //        tw.Close();
+            //    }
+
+            //    return sourceFile;
+            //}
+        }
+
+        // Use types from the System.Reflection namespace, including Assembly, PropertyInfo, MethodInfo, Type
+
     }
 }
