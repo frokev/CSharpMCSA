@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
+using System.Reflection;
 using System.Text;
 using System.Xml.Serialization;
 
@@ -11,7 +14,7 @@ namespace csharp_exam_practice
     { 
         static void Main(string[] args)
         {
-            new ConsumeTypes();
+            new FiExCrTyRuRe.Example(2).TestAssembly();
             Console.ReadKey();
         }
     }
@@ -366,8 +369,18 @@ namespace csharp_exam_practice
         // IDisposable - A mechanism for releasing unmanaged resources.
         class MyResource : IDisposable
         {
-            private IntPtr handle; // External unmanaged resource
-            // ManagedResource other;
+            // Managed resource (whatever the GC can clean up).
+            // Implements IDisposable which means we can manually dispose or leave it to finalizer.
+            // Finalizer is slow so manual disposal is prefered. 
+            // Lets pass on the option to manually dispose it by implementing the IDisposable.
+            private Component component = new Component();
+
+            // External unmanaged resource,
+            // we should offer the user a way to dispose of the resource.
+            // Make sure it's taken care of with finalizer if user doesn't.
+            // Log a massage to inform that unmanaged resources should be disposed manually (finalizer is slow at cleaning).
+            private IntPtr handle; 
+
             private bool disposed = false;
 
             public MyResource(IntPtr handle)
@@ -379,26 +392,32 @@ namespace csharp_exam_practice
             public void Dispose()
             {
                 Dispose(true);
-                GC.SuppressFinalize(this);
+                GC.SuppressFinalize(this); // We have already disposed of unmanaged resources, no need for the finalizer to do it again
             }
 
-            protected virtual void Dispose(bool disposable)
+            protected virtual void Dispose(bool disposing)
             {
                 // check if already disposed
                 if (this.disposed) return;
 
                 //If disposable, dispose managed resources. else the runtime has called it
-                if (disposable)
+                if (disposing)
                 {
-                    // this.other.Dispose();
+                    component.Dispose();
                 }
 
                 // Dispose unmanaged resources, Call cleanup methods
-                // CloseHandle(handle);
+                CloseHandle(handle);
                 handle = IntPtr.Zero;
+                
 
                 disposed = true; // We are done disposing
             }
+
+            // Use interop to call the method necessary
+            // to clean up the unmanaged resource.
+            [System.Runtime.InteropServices.DllImport("Kernel32")]
+            private extern static bool CloseHandle(IntPtr handle);
 
             // So finalizer can dispose unmanaged resources at runtime
             ~MyResource()
@@ -433,7 +452,10 @@ namespace csharp_exam_practice
         // Caller info attributes
         // [CallerMemberName] applies the caller’s member name
         // [CallerFilePath] applies the path to caller’s source code file
-        // [CallerLineNumber] applies the line number in caller’s source code file        // Create attributes - by deriving from Attribute        class Author : Attribute
+        // [CallerLineNumber] applies the line number in caller’s source code file
+
+        // Create attributes - by deriving from Attribute
+        class Author : Attribute
         {
             private string name;
             public double version;
@@ -449,7 +471,7 @@ namespace csharp_exam_practice
         [Author("kevin", version = 2)]
         public void Method()
         {
-            System.Reflection.MethodInfo attr = typeof(FiExCrTyRuRe).GetMethod("Author");
+            MethodAttributes attr = typeof(FiExCrTyRuRe).GetMethod("Author").Attributes;
         }
 
         // Generate code
@@ -489,6 +511,118 @@ namespace csharp_exam_practice
         }
 
         // Use types from the System.Reflection namespace, including Assembly, PropertyInfo, MethodInfo, Type
+        // Inspecting the metadata and compiled code of an assembly at runtime is called reflection.
 
+        Type t = typeof(string);
+        public void func()
+        {
+            Console.WriteLine(t.BaseType); // Object
+            Console.WriteLine(t.Namespace); // System
+            Console.WriteLine(t.Name); // SpecialFolder
+            Console.WriteLine(t.FullName); // System.Environment+SpecialFolder
+
+            foreach (Type iType in typeof(string).GetInterfaces())
+                Console.WriteLine(iType.Name); // IEnumerable, ICloneable, IComparable, IConvertible, IEquatable
+        }
+
+        public class Example
+        {
+            private int fraction;
+            public int AnInt { get; set; } = 2;
+            public Example(int i) => fraction = i;
+            public int Method(int i) => fraction * i;
+
+
+            public void TestAssembly()
+            {
+                Assembly assem = typeof(Example).Assembly;
+                Console.WriteLine(assem.GetName().CodeBase);
+                object o = assem.CreateInstance("csharp_exam_practice.FiExCrTyRuRe+Example", false, BindingFlags.ExactBinding, null, new object[] { 2 }, null, null);
+                MethodInfo m = o.GetType().GetMethod("Method");
+                object ret = m.Invoke(o, new object[] { 2 });
+                Console.WriteLine("Result of Method: {0}", ret);
+                PropertyInfo pi = o.GetType().GetProperty("AnInt", typeof(int));
+                Console.WriteLine("Property has name {0} and it's value is {1}", pi.Name, pi.GetValue(o));
+            }
+        }
     }
+
+    // Manage the object life cycle - See line 368
+
+    // Manipulate strings
+    // Manipulate strings by using the StringBuilder, StringWriter, and StringReader classes; 
+    // search strings; enumerate string methods; format strings; use string interpolation
+
+    class ManipulateStrings : IDisposable
+    {
+        // Good for manipulating strings. Strings are immutable, StringBuilder is mutable. 
+        // Each change to a String will create a new copy on the heap, and a new reference on the stack. 
+        // StringBuilder will modify itself on the heap, while keeping the same reference.
+        StringBuilder stringBuilder;
+        StringWriter stringWriter;
+        StringReader stringReader;
+
+        // Format strings
+        public void AppendFormat(ref object obj)
+        {
+            stringBuilder.AppendFormat("{0}", obj);
+            Console.WriteLine("StringBuilder has appended object: " + stringBuilder);
+        }
+
+        // Search strings
+        public void Search(ref string str)
+        {
+            bool doHave = stringBuilder.ToString().Contains(str);
+            Console.WriteLine("Is {0} found: {1}", str, doHave);
+        }
+
+        // String interpolation
+        public void Interpolation(object obj)
+        {
+            string str = $"This is interpolated: {obj}";
+            Console.WriteLine(str);
+        }
+
+        // Enumerate string
+        public void Enumerate()
+        {
+            Console.WriteLine("Enumerating\n");
+            foreach (char ch in stringBuilder.ToString())
+            {
+                Console.WriteLine("Char: {0}", ch);
+            }
+        }
+
+        // StringReader enables us to read async, or not.
+        // We can read characters, lines and the whole string
+        public async void ReadStrings()
+        {
+            char[] buff = new char[50];
+
+            // Read character by character into a buffer (char array)
+            int bytesRead = await stringReader.ReadAsync(buff, 0, 50);
+            Console.WriteLine("Char buffer: " + buff);
+
+            // line by line
+            string currString = await stringReader.ReadLineAsync();
+            while (currString != null)
+            {
+                Console.WriteLine($"Next line: {currString}");
+            }
+
+            // Whole string
+            string theString = await stringReader.ReadToEndAsync();
+            Console.WriteLine("Whole string: {0}", theString);
+        }
+
+        // TODO: StringWriter
+
+        // Dispose managed resources
+        public void Dispose()
+        {
+            stringReader.Dispose();
+            stringWriter.Dispose();
+        }
+    }
+
 }
