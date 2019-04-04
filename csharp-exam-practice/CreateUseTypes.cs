@@ -12,11 +12,11 @@ namespace csharp_exam_practice
     // Create and Use Types
     class CreateUseTypes
     { 
-        static void Main(string[] args)
-        {
-            new FiExCrTyRuRe.Example(2).TestAssembly();
-            Console.ReadKey();
-        }
+        //static void Main(string[] args)
+        //{
+        //    ManipulateStrings.FormatStrings();
+        //    Console.ReadKey();
+        //}
     }
 
     class CreateTypes
@@ -559,14 +559,28 @@ namespace csharp_exam_practice
         // Each change to a String will create a new copy on the heap, and a new reference on the stack. 
         // StringBuilder will modify itself on the heap, while keeping the same reference.
         StringBuilder stringBuilder;
-        StringWriter stringWriter;
+        StringWriter stringWriter = new StringWriter();
         StringReader stringReader;
 
         // Format strings
-        public void AppendFormat(ref object obj)
+        public static void FormatStrings()
         {
-            stringBuilder.AppendFormat("{0}", obj);
-            Console.WriteLine("StringBuilder has appended object: " + stringBuilder);
+
+            // Actual format strings
+            // We can use those to convert types
+
+            // hex to int
+            int thousand = int.Parse("3e8", System.Globalization.NumberStyles.HexNumber);
+            Console.WriteLine("Hex (3e8) to int: " + thousand);
+
+            // round to two decimals
+            string numStr = string.Format("{0:F2}", 134.527);
+            Console.WriteLine("134.527 rounded to two: " + numStr);
+
+            // to hexadecimal
+            string hexStr = string.Format("{0:X}", 47);
+            Console.WriteLine("47 in hex: " + hexStr);
+            
         }
 
         // Search strings
@@ -595,8 +609,9 @@ namespace csharp_exam_practice
 
         // StringReader enables us to read async, or not.
         // We can read characters, lines and the whole string
-        public async void ReadStrings()
+        public async void ReadStrings(StringReader sr)
         {
+            stringReader = sr;
             char[] buff = new char[50];
 
             // Read character by character into a buffer (char array)
@@ -615,7 +630,13 @@ namespace csharp_exam_practice
             Console.WriteLine("Whole string: {0}", theString);
         }
 
-        // TODO: StringWriter
+        // StringWriter (write stuff to a string or stream) StringBuilder cannot write to a stream
+
+        public void WriteStr()
+        {
+            stringWriter.Write("Hello World");
+            Console.WriteLine("StringWriter wrote: " + stringWriter);
+        }
 
         // Dispose managed resources
         public void Dispose()
