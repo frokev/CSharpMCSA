@@ -5,12 +5,11 @@ using System.Text;
 using System.Runtime.Serialization;
 using System.Net;
 using System.Runtime.Serialization.Json;
-using System.Web;
 using System.Reflection;
 using System.IO;
 using System.Linq;
-using System.ComponentModel;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 
 namespace csharp_exam_practice
 {
@@ -134,19 +133,17 @@ namespace csharp_exam_practice
 
         public SymAndAsymEncryption()
         {
-            // hash data
-            byte[] hash = GenerateHash("Hello World");
-            bool isValid = VerifyHash("Hello World", hash);
-            string [] strarr = hash.Select(b => b.ToString()).ToArray();
-            Console.WriteLine($"Hashed 'Hello World' to: {string.Join(" ", strarr)}\nVerification method: {isValid}\n");
-            // ---------
+            
+        }
 
+        public void EncryptDecryptStreamTest()
+        {
             // encrypt/decrypt streams; symmetric encryption (see bin->debug for test.txt output)
             var fs = new FileStream("test.txt", FileMode.Create, FileAccess.ReadWrite);
             RijndaelManaged rmCrypto = new RijndaelManaged(); // Encryption algorithm
             rmCrypto.GenerateIV(); // make IV
             rmCrypto.GenerateKey(); // make key
-            
+
             // Encrypt and write
             var toEncrypt = "This will get encrypted";
             // Stream wrappers must have "leaveOpen" parm set true if we intend to dispose them and reuse the base stream
@@ -157,7 +154,7 @@ namespace csharp_exam_practice
             csw.Dispose();
             // Must reset stream position before we read. It will be at the end after we write to it.
             // Must flush all stream wrappers before we set new position (dispose will close and flush)
-            fs.Position = 0; 
+            fs.Position = 0;
 
             // Decrypt and read
             //var fsRead = new FileStream("test.txt", FileMode.Open, FileAccess.Read);
@@ -172,6 +169,16 @@ namespace csharp_exam_practice
             sr.Dispose();
             fs.Dispose();
             //-----------------
+        }
+
+        public void HashDataTest()
+        {
+            // hash data
+            byte[] hash = GenerateHash("Hello World");
+            bool isValid = VerifyHash("Hello World", hash);
+            string[] strarr = hash.Select(b => b.ToString()).ToArray();
+            Console.WriteLine($"Hashed 'Hello World' to: {string.Join(" ", strarr)}\nVerification method: {isValid}\n");
+            // ---------
         }
 
         public byte[] GenerateHash(string value)
@@ -190,5 +197,122 @@ namespace csharp_exam_practice
             byte[] hashedVal = sha2.ComputeHash(byteVal);
             return hashedVal.SequenceEqual(hash);
         }
+
+        // Public key encryption (asymmetric)
+        public void RSAEncryptDecryptTest()
+        {
+            byte[] data = { 1, 2, 3, 4, 5, }; // This is what we're encrypting. (why does a byte array take a 32-bit signed integer which is 4 bytes?)
+            using (var rsa = new RSACryptoServiceProvider(2048)) // Keysize of 2048 is recommended for increased security
+            {
+                // rsa instance generate a keypair on encryption if none is specified.
+                byte[] encrypted = rsa.Encrypt(data, true); // encrypted message (OAEP padding adds security)
+                Console.WriteLine("Encrypted byte array: " + string.Join(", ", encrypted));
+                byte[] decrypted = rsa.Decrypt(encrypted, true); // decrypt message
+                Console.WriteLine("Decrypted byte array: " + string.Join(", ", decrypted));
+            }
+        }
+
+        // Generate and save keys to xml string
+        public void RSAGenerateToXML()
+        {
+            using  (var rsa = new RSACryptoServiceProvider(2048))
+            {
+                // rsa will generate new keys on first call to ToXmlString if none is existing
+                File.WriteAllText("PublicKeyOnly.xml", rsa.ToXmlString(false));
+                File.WriteAllText("PublicPrivate.xml", rsa.ToXmlString(true));
+                Console.WriteLine("Generated public key added to: PublicKeyOnly.xml");
+                Console.WriteLine("Generated public and private key added to: PublicPrivate.xml");
+            }
+        }
+
+        // Use existing keys
+        public void RSAUseExistingTest()
+        {
+            byte[] data = Encoding.UTF8.GetBytes("Message to encrypt");
+            string publicKeyOnly = File.ReadAllText("PublicKeyOnly.xml");
+            string publicPrivate = File.ReadAllText("PublicPrivate.xml");
+            byte[] encrypted, decrypted;
+            using (var rsaPublicOnly = new RSACryptoServiceProvider())
+            {
+                rsaPublicOnly.FromXmlString(publicKeyOnly);
+                encrypted = rsaPublicOnly.Encrypt(data, true);
+                Console.WriteLine("Data encrypted using public key");
+                // The next line would throw an exception because you need the private
+                // key in order to decrypt:
+                // decrypted = rsaPublicOnly.Decrypt (encrypted, true);
+            }            using (var rsaPublicPrivate = new RSACryptoServiceProvider())
+            {
+                // With the private key we can successfully decrypt:
+                rsaPublicPrivate.FromXmlString(publicPrivate);
+                decrypted = rsaPublicPrivate.Decrypt(encrypted, true);
+                Console.WriteLine("Data decrypted using private key");
+            }
+
+        }
+
+        public void RSASignDataTest()
+        {
+            byte[] data = Encoding.UTF8.GetBytes("Message to sign");
+            byte[] publicKey;
+            byte[] signature;
+            object hasher = SHA1.Create(); // Our chosen hashing algorithm.
+                                           
+            // Generate a new key pair, then sign the data with it:
+            using (var publicPrivate = new RSACryptoServiceProvider())
+            {
+                signature = publicPrivate.SignData(data, hasher);
+                publicKey = publicPrivate.ExportCspBlob(false); // get public key
+            }
+
+            // Create a fresh RSA using just the public key, then test the signature.
+            using (var publicOnly = new RSACryptoServiceProvider())
+            {
+                publicOnly.ImportCspBlob(publicKey); // Use public key of the signer
+                Console.Write(publicOnly.VerifyData(data, hasher, signature)); // True
+                // Let's now tamper with the data, and recheck the signature:
+                data[0] = 0;
+                Console.Write(publicOnly.VerifyData(data, hasher, signature)); // False
+                // The following throws an exception as we're lacking a private key:
+                // signature = publicOnly.SignData(data, hasher);
+            }
+        }
+
+        // We can make a certificate using "makecert" commmand from VS command prompt
+        // Here I have made a certificate in a certification store called "demoCertStore" on the local machine using:
+        // "makecert -n "CN=MyName" -ss demoCertStore -sr currentuser
+        public void Certificates()
+        {
+            // Sign a message
+            X509Store store = new X509Store("demoCertStore", StoreLocation.CurrentUser);
+            store.Open(OpenFlags.ReadOnly); // Open certificate store
+
+            X509Certificate2 cert = store.Certificates[0]; // Get a representation of our certificate
+            RSACryptoServiceProvider rsa = cert.PrivateKey as RSACryptoServiceProvider; // Pass the private asym algo object to our RSA provider
+
+            string messageToSign = "Hello World";
+            byte[] msgInBytes = Encoding.ASCII.GetBytes(messageToSign);
+
+            byte[] signature = rsa.SignData(msgInBytes, HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1); // Sign message
+            Console.WriteLine("Signed message '{0}', signature:\n{1}", messageToSign, string.Join(" ", signature));
+
+            // Validate data by checking the signature
+            RSACryptoServiceProvider rsaDecryptor = cert.PublicKey.Key as RSACryptoServiceProvider;
+            bool isDataValid = rsaDecryptor.VerifyData(msgInBytes, signature, HashAlgorithmName.SHA1, RSASignaturePadding.Pkcs1);
+            Console.WriteLine("Does this data has the correct signature? {0}\n", isDataValid);
+
+            rsaDecryptor.Dispose();
+            rsa.Dispose();
+            cert.Dispose();
+            store.Dispose();
+        }
+    }
+
+    // Manage Assemblies
+    // Version assemblies; sign assemblies using strong names; 
+    // implement side-by-side hosting; put an assembly in the global assembly cache; 
+    // create a WinMD assembly
+    class ManageAssemblies
+    {
+
     }
 }
