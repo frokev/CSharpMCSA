@@ -567,7 +567,7 @@ namespace csharp_exam_practice
         {
 
             // Actual format strings
-            // We can use those to convert types
+            // We can use those to convert strings into types, or the other way around
 
             // hex to int
             int thousand = int.Parse("3e8", System.Globalization.NumberStyles.HexNumber);
@@ -607,7 +607,7 @@ namespace csharp_exam_practice
             }
         }
 
-        // StringReader enables us to read async, or not.
+        // StringReader enables us to read strings async, or not.
         // We can read characters, lines and the whole string
         public async void ReadStrings(StringReader sr)
         {
@@ -630,7 +630,7 @@ namespace csharp_exam_practice
             Console.WriteLine("Whole string: {0}", theString);
         }
 
-        // StringWriter (write stuff to a string or stream) StringBuilder cannot write to a stream
+        // StringWriter (write stuff to a string async or not) StringBuilder cannot write to a stream
 
         public void WriteStr()
         {
