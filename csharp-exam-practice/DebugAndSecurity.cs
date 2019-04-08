@@ -1,4 +1,6 @@
-﻿using System;
+﻿#define DIAGNOSTICS
+
+using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using System.Text;
@@ -10,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Diagnostics;
 
 namespace csharp_exam_practice
 {
@@ -19,12 +22,12 @@ namespace csharp_exam_practice
     {
         static void Main(string[] args)
         {
-            new SymAndAsymEncryption();
+            new DebugAnApplication().ConditionalAttribute();
             Console.ReadKey();
         }
     }
 
-    // Validate application input
+    // Validate application input -------------------------------------------------------
     // Validate JSON data; choose the appropriate data collection type; 
     // manage data integrity; evaluate a regular expression to validate the input format; 
     // use built-in functions to validate data type and content
@@ -117,7 +120,7 @@ namespace csharp_exam_practice
         }
     }
 
-    // Perform symmetric and asymmetric encryption
+    // Perform symmetric and asymmetric encryption -----------------------------------------------------------------------
     // Choose an appropriate encryption algorithm; 
     // manage and create certificates; implement key management; 
     // implement the System.Security namespace; hash data; encrypt streams
@@ -240,7 +243,9 @@ namespace csharp_exam_practice
                 // The next line would throw an exception because you need the private
                 // key in order to decrypt:
                 // decrypted = rsaPublicOnly.Decrypt (encrypted, true);
-            }            using (var rsaPublicPrivate = new RSACryptoServiceProvider())
+            }
+
+            using (var rsaPublicPrivate = new RSACryptoServiceProvider())
             {
                 // With the private key we can successfully decrypt:
                 rsaPublicPrivate.FromXmlString(publicPrivate);
@@ -307,12 +312,105 @@ namespace csharp_exam_practice
         }
     }
 
-    // Manage Assemblies
+    class ManageAssemblies { } // Just for easy navigation in solution explorer
+    // Manage Assemblies ------------------------------------------------------------
+
     // Version assemblies; sign assemblies using strong names; 
     // implement side-by-side hosting; put an assembly in the global assembly cache; 
     // create a WinMD assembly
-    class ManageAssemblies
-    {
 
+    // Assembly information can be found in AssemblyInfo.cs,
+    // Visual Studio generates this file when you build the assembly,
+    // you can change it's content by going to project properties -> package
+
+
+    // Version Assemblies
+
+    // A version number can be changed in AssemblyInfo.cs
+    // The runtime makes sure applications run only with the version they were built and tested with
+    // This behaviour can be overridden by explicit version policy, in config files
+    // An assembly version is expressed as 4 values: {Major}.{Minor}.{Build}.{Revision}
+    // Major version: Incremented with new features or breaking changes.
+    // Minor version: Incremented when smaller changes are made to the assembly.
+    // Build number: Incremented with each build, used by server to identify changes
+    // Revision number: Used to track patched versions in a production environment
+
+
+    // Sign Assemblies
+
+    // A strong named assembly is signed and validated using asymmetric encryption.
+    // You can generate keys for signing an assembly using the "sn" command line command,
+    // or sign the assembly in VS by going to sign tab in project properties.
+    // When the assembly is signed, the manifest will contain the public key, which is used for validation.
+    // Signing an assembly allows us to ensure it hasn't been tampered with.
+    // It is necessary if you want to put it in the GAC (Global Assembly Cache)
+
+
+    // Implement side-by-side hosting
+
+    // Since assemblies in the GAC are strongly-named they can be uniquely identified,
+    // this allows us to hold multiple versions of the same assembly.
+    // This is called side-by-side hosting.
+    // It allows applications to reference different version of the same assembly, hence preventing "dll hell".
+    // If you need all applications that previously referenced the old assembly,
+    // to reference the new assembly, you can use "assembly binding redirection".
+    // This can be done trough a policy file with the name of the apps executable following ".config" (new assembly must have same publicKeyToken)
+
+
+    // Put an assembly in the global assembly cache
+
+    // The GAC allows an assembly to be visible among applications on the machine
+    // Assemblies in the GAC is in a folder on the machine: windows folder -> assembly
+
+
+    // Create a WinMD assembly
+
+    // A WinMD assembly (WinRT component) allows windows applications to be deployed across different devices,
+    // It can do this by exposing the API elements of windows trough WinMD files
+    // We can create a WinMD assembly in C# by starting a new Windows Runtime Component project, from the "windows universal" tab.
+
+    // ----------------------------------------------------------------------------------
+
+
+    // Debug an application ------------------------------------------------------
+    // Create and manage preprocessor directives; choose an appropriate build type; 
+    // manage program database files (debug symbols)
+
+    class DebugAnApplication {
+
+        // Create and manage preprocessor directives
+
+        // We can use preprocessor directives to tell the compiler things, 
+        // like ignore compilation of certain instructions used in testing (conditional compilation).
+        // Our diagnostics symbol must be defined at the top of the file "#define DIAGNOSTICS"
+        // We can also define symbols in the project properties -> Build
+        // #pragma directive is used to suppress warnings for a region of code: #pragma warning disable, #pragma warning enable
+        public void ConditionalCompilation()
+        {
+            string test = "test";
+            Console.WriteLine("I got compiled");
+#if DIAGNOSTICS
+            Console.WriteLine("I might have not been compiled {0}", test);
+#endif
+        }
+
+        // We can prevent a method from being called using an attribute and our DIAGNOSTICS symbol
+        // This will always be compiled, but our symbol decides if it will run
+        [Conditional("DIAGNOSTICS")]
+        public void ConditionalAttribute()
+        {
+            Console.WriteLine("DIAGNOSTICS is defined");
+        }
+
+        // Choose an appropriate build type
+
+        // There are two debug types by default - build and debug
+        // You can configure the behaviours for these under project properties
+        // By default the release build makes optimizations and removes operations used for debugging
+        // We can make a custom build using the Configuration Manager from the build mode dropdown in VS
+
+
+        // Manage programming database files
     }
+
 }
