@@ -1,0 +1,10 @@
+C:\Users\Tor\source\repos\csharp-exam-practice\csharp-exam-practice\obj\Debug\net472\csharp-exam-practice.csprojAssemblyReference.cache
+C:\Users\Tor\source\repos\csharp-exam-practice\csharp-exam-practice\obj\Debug\net472\csharp-exam-practice.csproj.CoreCompileInputs.cache
+C:\Users\Tor\source\repos\csharp-exam-practice\csharp-exam-practice\obj\Debug\net472\csharp-exam-practice.AssemblyInfoInputs.cache
+C:\Users\Tor\source\repos\csharp-exam-practice\csharp-exam-practice\obj\Debug\net472\csharp-exam-practice.AssemblyInfo.cs
+C:\Users\Tor\source\repos\csharp-exam-practice\csharp-exam-practice\bin\Debug\net472\csharp-exam-practice.exe
+C:\Users\Tor\source\repos\csharp-exam-practice\csharp-exam-practice\bin\Debug\net472\csharp-exam-practice.pdb
+C:\Users\Tor\source\repos\csharp-exam-practice\csharp-exam-practice\bin\Debug\net472\Newtonsoft.Json.dll
+C:\Users\Tor\source\repos\csharp-exam-practice\csharp-exam-practice\obj\Debug\net472\csharp-exam-practice.csproj.CopyComplete
+C:\Users\Tor\source\repos\csharp-exam-practice\csharp-exam-practice\obj\Debug\net472\csharp-exam-practice.exe
+C:\Users\Tor\source\repos\csharp-exam-practice\csharp-exam-practice\obj\Debug\net472\csharp-exam-practice.pdb

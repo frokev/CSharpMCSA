@@ -1,6 +1,7 @@
 ﻿#define DIAGNOSTICS
 
 using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using System.Text;
@@ -12,19 +13,19 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Diagnostics;
+using System.Threading;
 
 namespace csharp_exam_practice
 {
-    // Debug applications and implement security
+    // ------------------------------Debug applications and implement security-------------------------------------
 
-    class DebugAndSecurity
+    public class DebugAndSecurity
     {
-        static void Main(string[] args)
-        {
-            new DebugAnApplication().ConditionalAttribute();
-            Console.ReadKey();
-        }
+        //static void Main(string[] args)
+        //{
+        //    new DebugAnApplication().PerformancerMonitor();
+        //    Console.ReadKey();
+        //}
     }
 
     // Validate application input -------------------------------------------------------
@@ -372,7 +373,7 @@ namespace csharp_exam_practice
     // ----------------------------------------------------------------------------------
 
 
-    // Debug an application ------------------------------------------------------
+    // -----------------------Debug an application ---------------------------------
     // Create and manage preprocessor directives; choose an appropriate build type; 
     // manage program database files (debug symbols)
 
@@ -410,7 +411,115 @@ namespace csharp_exam_practice
         // We can make a custom build using the Configuration Manager from the build mode dropdown in VS
 
 
-        // Manage programming database files
+        // Manage programming database files (debug symbols)
+
+        // A program debug database file (symbol file) is produced in compilation.
+        // The file output is of a .pdb extention.
+        // It includes debugger information and mapping of source code to compiled statements.
+        // The mapping includes all code symbols with mapping to their memory addresses, when the program runs.
+        // the symbol file contains a GUID which is held in the executable, so we can only use that file with the executable.
+
+        // You can use the "pdbcopy" tool to modify the the existing .pdb file
+        // This will create a copy holding the same GUID which allows you to replace the other one.
+        // You can use the tool to remove private symbols or a list of symbols, such that they are not mapped.
+
+        // You can use a symbol server to provide information to the debugger in place of the symbol file.
+        // This can be done trough VS in tools -> options -> debugging -> symbols.
+        // Here you can select a new symbol file to be used when debugging, and manually use the MS Symbol Servers.
+        // By default symbols for modules are loaded automatically (as needed) when debugging you can turn this off in the options.
+
+        //--------------------------------------------------------------------------------------------------
+
+
+        // ------------------------Implement diagnostics in an application ------------------------------
+        // Implement logging and tracing; profiling applications; 
+        // create and monitor performance counters; write to the event log
+
+
+        // Implement logging and tracing
+
+        // We can use the Debug.WriteLine and Debug.WriteLineIf (System.Diagnostics) to log messages, 
+        // the statements will only be included in the debug build 
+
+        // The Trace object (System.Diagnostics) is usually defined for production builds,
+        // such that these will produce output in production builds.
+        // The TraceInformation, TraceWarning and TraceError objects is used to specify the importance of the message.
+
+        // By default Trace output is sent to the output window in VS, 
+        // we can send this elsewhere by using the TraceListener object.
+        // There are different types of TraceListener for sending data to console, text file and more.
+        // We can inherit the class to send the output data anywhere we want.
+        // EventLogTraceListener can be used to write to the event log.
+
+        // We can use the TraceSource class to output more than just simple messages
+        // Like event types, define values that represent an event and messages, even object references
+
+        // We can write output based on the tracing level with the SourceSwitch class
+        
+        public void SourceSwitchTest()
+        {
+            TraceSource trace = new TraceSource("Tracer", SourceLevels.All);
+            SourceSwitch ss = new SourceSwitch("Control", "Trace output");
+            ss.Level = SourceLevels.Information;
+            trace.Switch = ss;
+
+            trace.TraceEvent(TraceEventType.Information, 10001, "info");
+            trace.TraceEvent(TraceEventType.Verbose, 10002, "verbose");
+            trace.TraceEvent(TraceEventType.Information, 10001, "info", new object[] { "yo", 15 });
+            Trace.TraceWarning("waaarrrn");
+            Trace.TraceError("errrr");
+            trace.Flush();
+            trace.Close();
+        }
+
+        // We can configure tracing using the application .config file
+
+        // We can use the Stopwatch class to measure speed of operations
+        // We can use VS diagnosic tools to measure performance of an app
+        // Performance profiler provides profiling tools to check things like cpu usage, memory leaks etc.
+
+        public void StopwatchTest()
+        {
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            bool what = false;
+            for (int i = 0; i < 1000; i++) Console.WriteLine(i);
+            sw.Stop();
+            Console.WriteLine("Time to print 1000 messages.\n{0} ms", sw.ElapsedMilliseconds);
+        }
+
+        // Assertions are used for statements you believe to be true,
+        // if it's not, there will be an output with options to: abort, retry and ignore.
+
+
+        // Create and monitor performance counters
+
+        // We can use the perfmon tool to monitor the performance of a computer
+        // It contains a large number of performance counters
+
+        // A program can monitor performance counters like so:
+        
+        public void PerformancerMonitor()
+        {
+            PerformanceCounter processor = new PerformanceCounter(
+                categoryName: "Processor Information", 
+                counterName: "% Processor Time", 
+                instanceName: "_Total");
+
+            while (true)
+            {
+                Console.WriteLine("Processor time: {0}", processor.NextValue());
+                Thread.Sleep(500);
+                if (Console.KeyAvailable)
+                    break;
+            }
+        }
+
+        // You can create performance counters using PerformanceCounterCategory.Create
+
+
+        // We can read and write to the event log using EventLog class.
     }
+    //------------------------------------------------------------------------------
 
 }
