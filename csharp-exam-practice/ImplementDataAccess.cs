@@ -6,6 +6,8 @@ using System.Net.Http;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data.SqlClient;
+using System.Xml;
 
 namespace csharp_exam_practice
 {
@@ -14,7 +16,7 @@ namespace csharp_exam_practice
     {
         static void Main(string[] args)
         {
-            new AsyncIO().WriteFileAsyncTest();
+            new ConsumeData().ReadWithSQL();
             Console.ReadKey();
         }
     }
@@ -101,11 +103,78 @@ namespace csharp_exam_practice
     // Retrieve data from a database; update data in a database; 
     // consume JSON and XML data; retrieve data by using web services
 
+    // We have set up a local database in MySql Workbench, with a schema test, and table person
     class ConsumeData
     {
+        private string dbConnectionString = "Server=(localdb)\\mssqllocaldb;Database=MySQL57;Uid=root;Pwd=password;";
+
         public void ReadWithSQL()
         {
-            
+            using (SqlConnection connection = new SqlConnection(dbConnectionString))
+            {
+                connection.Open();
+                SqlCommand command = new SqlCommand("SELECT * FROM test.person");
+                SqlDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    string firstName = reader["first_name"].ToString();
+                    string lastName = reader["last_name"].ToString();
+                    Console.WriteLine("First name: {0}, Last name: {1}", firstName, lastName);
+                }
+            }
+            // Parameters to avoid SQL injection:
+            // string connection = "UPDATE whatever SET name=@name WHERE id=@id"
+            // command.Parameters.AddWithValue(@name, userInput);
         }
+
+        // See DebugAndSecurity > ValidateInput. Here we serialize json data into an object.
+
+        //XML documents:
+
+        string XMLDocument = "<? xml version =\" 1.0\" encoding =\" utf-16\"? >" +
+            "< MusicTrack xmlns:xsi =\" http:// www.w3. org/ 2001/ XMLSchema-instance\" " +
+            "xmlns:xsd =\" http:// www.w3. org/ 2001/ XMLSchema\" > " +
+            "< Artist > Rob Miles </ Artist > " +
+            "< Title > My Way </ Title > " +
+            "< Length > 150 </ Length >" +
+            "</ MusicTrack >";
+
+        public void ReadXMLDoc()
+        {
+            using (StringReader stringReader = new StringReader(XMLDocument)) {
+                XmlTextReader reader = new XmlTextReader(stringReader);
+                while (reader.Read()) {
+                    string description = string.Format(" Type:{0} Name:{1} Value:{2}", reader.NodeType.ToString(), reader.Name, reader.Value);
+                    Console.WriteLine(description);
+                }
+            }
+        }
+
+        // Using XMLDom to extract data
+        public void XmlDomTest()
+        {
+            XmlDocument doc = new XmlDocument();
+            doc.LoadXml(XMLDocument);
+            XmlElement rootElement = doc.DocumentElement;
+            // make sure it is the right element 
+            if (rootElement.Name != "MusicTrack")
+            {
+                Console.WriteLine(" Not a music track");
+
+            } else
+            {
+                string artist = rootElement[" Artist"].FirstChild.Value;
+                Console.WriteLine("", artist);
+                string title = rootElement[" Title"].FirstChild.Value;
+                Console.WriteLine(" Artist:{ 0} Title:{ 1}", artist, title);
+            }
+        }
+
+        // Retrieve data using web services, Windows Communication Foundation (WCF)
+
     }
+
+    
+
+
 }
