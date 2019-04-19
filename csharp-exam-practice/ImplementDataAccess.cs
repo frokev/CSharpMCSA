@@ -17,11 +17,11 @@ namespace csharp_exam_practice
     // ---------------------------------Implement Data Access---------------------------------
     class ImplementDataAccess
     {
-        static void Main(string[] args)
-        {
-            new ConsumeData().TestService(2);
-            Console.ReadKey();
-        }
+        //static void Main(string[] args)
+        //{
+        //    new ConsumeData().TestService(2);
+        //    Console.ReadKey();
+        //}
     }
 
     // ---------------Perform I/O operations---------------
@@ -127,7 +127,7 @@ namespace csharp_exam_practice
                 }
             }
             // Parameters to avoid SQL injection:
-            // string connection = "UPDATE whatever SET name=@name WHERE id=@id"
+            // string query = "UPDATE whatever SET name=@name WHERE id=@id"
             // command.Parameters.AddWithValue(@name, userInput);
         }
 
@@ -311,7 +311,7 @@ namespace csharp_exam_practice
             // Skip returns all elements except the specified number of elements at the start of a sequence.
             // SkipWhile skips elements until a specified condition is true, returns the remaining
 
-            // Create method based LINQ queries. This is linq using fluent syntax instead of query expressions (a syntax build into c#)
+            // Create method based LINQ queries. This is linq using fluent syntax instead of query expressions (a syntax built into c#)
             // Query comprehension syntax = linq query expressions
 
 
